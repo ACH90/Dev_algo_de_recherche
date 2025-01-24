@@ -1,3 +1,4 @@
+// Fonction pour mettre à jour les filtres avancés
 export function updateAdvancedFilters(
   filteredRecipes,
   selectedTags,
@@ -17,19 +18,19 @@ export function updateAdvancedFilters(
   // Mettre à jour les options du menu déroulant avec les éléments de filtre disponibles et non sélectionnés
   updateFilterOptions(
     ".ingredient-options",
-    Array.from(ingredients),
+    Array.from(ingredients).sort(), // Tri des ingrédients pour un affichage ordonné
     selectedTags,
     addTagCallback
   );
   updateFilterOptions(
     ".appliance-options",
-    Array.from(appliances),
+    Array.from(appliances).sort(), // Tri des appareils pour un affichage ordonné
     selectedTags,
     addTagCallback
   );
   updateFilterOptions(
     ".utensil-options",
-    Array.from(utensils),
+    Array.from(utensils).sort(), // Tri des ustensiles pour un affichage ordonné
     selectedTags,
     addTagCallback
   );
@@ -58,20 +59,46 @@ export function updateFilterOptions(
   });
 }
 
-// Fonction pour filtrer les recettes en fonction des tags sélectionnés
-export function filterRecipesByTags(recipes, selectedTags) {
-  return recipes.filter((recipe) => {
-    return selectedTags.every((tag) => {
-      const matchIngredient = recipe.ingredients.some((ingredient) =>
-        ingredient.ingredient.toLowerCase().includes(tag.toLowerCase())
-      );
-      const matchAppliance = recipe.appliance
-        .toLowerCase()
-        .includes(tag.toLowerCase());
-      const matchUtensil = recipe.ustensils.some((utensil) =>
-        utensil.toLowerCase().includes(tag.toLowerCase())
-      );
-      return matchIngredient || matchAppliance || matchUtensil; // Retourner true si un tag correspond
-    });
-  });
+//-------------------------
+
+// Fonction pour gérer le filtrage des ingrédients
+function handleIngredientFilter(inputElement) {
+  const ingredientsList = recipes.flatMap((recipe) =>
+    recipe.ingredients.map((item) => item.ingredient.toLowerCase())
+  );
+  filterDropdownOptions(
+    inputElement,
+    ".ingredient-options",
+    ingredientsList,
+    selectedTags,
+    updateFilterOptions
+  );
+}
+
+// Fonction pour gérer le filtrage des appareils
+function handleApplianceFilter(inputElement) {
+  const appliancesList = recipes.map((recipe) =>
+    recipe.appliance.toLowerCase()
+  );
+  filterDropdownOptions(
+    inputElement,
+    ".appliance-options",
+    appliancesList,
+    selectedTags,
+    updateFilterOptions
+  );
+}
+
+// Fonction pour gérer le filtrage des ustensiles
+function handleUstensilFilter(inputElement) {
+  const ustensilsList = recipes.flatMap((recipe) =>
+    recipe.ustensils.map((ustensil) => ustensil.toLowerCase())
+  );
+  filterDropdownOptions(
+    inputElement,
+    ".ustensil-options",
+    ustensilsList,
+    selectedTags,
+    updateFilterOptions
+  );
 }
