@@ -31,10 +31,6 @@ export function updateAdvancedFilters(
     recipe.ustensils.forEach((ust) => utensils.add(ust));
   });
 
-  console.log("Ingredients dans FilterUtils:", ingredients);
-  console.log("Appliances dans FilterUtils:", appliances);
-  console.log("Ustensils dans FilterUtils:", utensils);
-
   // Mettre à jour les options du menu déroulant avec les éléments de filtre disponibles et non sélectionnés
   updateFilterOptions(
     ".ingredient-options",
@@ -80,13 +76,14 @@ export function handleIngredientFilter(inputElement) {
   const ingredientsList = recipes.flatMap(
     (recipe) => recipe.ingredients.map((item) => item.ingredient.toLowerCase()) // Liste des ingrédients en minuscule
   );
+  console.log("Voici la liste des ingrédients", ingredientsList);
 
   // Appeler la fonction de filtrage et mettre à jour le dropdown
   filterDropdownOptions(
     inputElement,
     ".ingredient-options", // Sélecteur du dropdown à mettre à jour
     ingredientsList, // Liste des ingrédients à filtrer
-    selectedTags, // Tags sélectionnés (si nécessaire pour l'exclusion)
+
     updateFilterOptions // Fonction pour mettre à jour les options du dropdown
   );
 }

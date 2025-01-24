@@ -23,6 +23,9 @@ const applianceFilter = document.querySelector(".appliance-search-input");
 const ustensilFilter = document.querySelector(".utensil-search-input");
 const recipesContainer = document.querySelector(".recipes-container");
 const recipesCount = document.querySelector(".recipe-count-number");
+const ingredients = new Set(); // Set pour stocker les ingrédients uniques
+const appliances = new Set(); // Set pour stocker les appareils uniques
+const utensils = new Set(); // Set pour stocker les ustensiles uniques
 
 // Message d'erreur
 const errorContainer = document.createElement("div");
@@ -71,7 +74,17 @@ const updateRecipesDisplay = () => {
     return recipeCardFactory.createRecipeCard(recipe); // Retourne un élément DOM
   });
 
+  // Parcourir chaque recette et extraire ses ingrédients, appareils et ustensiles
+  filteredRecipes.forEach((recipe) => {
+    recipe.ingredients.forEach((ing) => ingredients.add(ing.ingredient));
+    appliances.add(recipe.appliance);
+    recipe.ustensils.forEach((ust) => utensils.add(ust));
+  });
+
   console.log("Voici les recettes filtéres dans App", filteredRecipes);
+  console.log("Voici les ingredients dans App", ingredients);
+  console.log("Voici les appareils dans App", appliances);
+  console.log("Voici les ustensiles dans App", utensils);
 
   // Une fois le tableau d'éléments généré, on les ajoute tous au conteneur
   recipeCards.forEach((card) => recipesContainer.appendChild(card));
@@ -110,11 +123,10 @@ searchBar.addEventListener("input", (e) => {
   updateRecipesDisplay();
 });
 
-// ingredientFilter.addEventListener("input", (e) =>
-//   updateAdvancedFilters(e, "ingredient")
-// );
-applianceFilter.addEventListener("input", (e) => updateFilter(e, "appliance"));
-ustensilFilter.addEventListener("input", (e) => updateFilter(e, "ustensil"));
+ingredientFilter.addEventListener("input", (e) => {
+  selectedIngredient = e.target.value.trim().toLowerCase();
+  updateRecipesDisplay();
+});
 
 // Chargement initial des recettes
 updateRecipesDisplay();
