@@ -71,3 +71,20 @@ export function addOptionToDropdown(tagText, selector, addTagCallback) {
 
   dropdownContainer.appendChild(option);
 }
+
+//-------------------------------------------------------------------------------------------------
+
+// Fonction pour ajouter un tag sélectionné à selectedTags
+export function handleAddTag(tag, selector) {
+  // Si le tag n'est pas déjà sélectionné, l'ajouter à selectedTags
+  if (!selectedTags.includes(tag)) {
+    selectedTags.push(tag);
+  }
+
+  // Mettre à jour l'affichage des recettes filtrées
+  updateRecipesDisplay();
+
+  // Fermer le menu déroulant après la sélection (si nécessaire)
+  const dropdown = document.querySelector(selector);
+  dropdown.classList.remove("show");
+}
