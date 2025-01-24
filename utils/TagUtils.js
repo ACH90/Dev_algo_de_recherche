@@ -1,4 +1,4 @@
-// Fonction pour ajouter un tag au tableau des tags sélectionnés et mettre à jour l'interface utilisateur
+// Function to add a tag to the selected tags array and update the UI
 export function addTag(
   tagText,
   selector,
@@ -8,28 +8,28 @@ export function addTag(
   updateFiltersCallback
 ) {
   if (!selectedTags.includes(tagText)) {
-    selectedTags.push(tagText); // Ajouter le tag au tableau des tags sélectionnés
+    selectedTags.push(tagText); // Add tag to the selected tags array
 
     const tagElement = document.createElement("div");
     tagElement.classList.add("tag");
-    tagElement.innerHTML = `<span>${tagText}</span><button>x</button>`; // Ajouter le texte du tag et un bouton pour supprimer
+    tagElement.innerHTML = `<span>${tagText}</span><button>x</button>`; // Add the tag text and a remove button
 
-    // Ajouter un écouteur d'événements au bouton de suppression
+    // Add event listener to the remove button
     tagElement
       .querySelector("button")
       .addEventListener("click", () =>
         removeTagCallback(tagText, tagElement, selector)
       );
 
-    tagContainerUnified.appendChild(tagElement); // Ajouter le tag au conteneur des tags
-    removeOptionFromDropdown(tagText, selector); // Retirer le tag sélectionné des options du menu déroulant
-    updateFiltersCallback(); // Mettre à jour les filtres en fonction de la nouvelle sélection
-    return true; // Tag ajouté
+    tagContainerUnified.appendChild(tagElement); // Append the tag to the tag container
+    removeOptionFromDropdown(tagText, selector); // Remove the selected tag from the dropdown options
+    updateFiltersCallback(); // Update filters based on the new selection
+    return true; // Tag added
   }
-  return false; // Le tag existe déjà
+  return false; // Tag already exists
 }
 
-// Fonction pour supprimer un tag et mettre à jour l'interface utilisateur
+// Function to remove a tag and update the UI
 export function removeTag(
   tagText,
   tagElement,
@@ -39,29 +39,29 @@ export function removeTag(
   addOptionToDropdownCallback,
   updateFiltersCallback
 ) {
-  selectedTags = selectedTags.filter((tag) => tag !== tagText); // Retirer le tag du tableau des tags sélectionnés
-  tagContainerUnified.removeChild(tagElement); // Retirer le tag du conteneur des tags
+  selectedTags = selectedTags.filter((tag) => tag !== tagText); // Remove the tag from the selected tags array
+  tagContainerUnified.removeChild(tagElement); // Remove the tag from the tag container
 
-  addOptionToDropdownCallback(tagText, selector); // Ré-ajouter l'option au menu déroulant
-  updateFiltersCallback(); // Mettre à jour les filtres en fonction de la suppression
-  return selectedTags; // Retourner les tags sélectionnés mis à jour
+  addOptionToDropdownCallback(tagText, selector); // Re-add the option to the dropdown
+  updateFiltersCallback(); // Update filters based on the removal
+  return selectedTags; // Return updated selectedTags
 }
 
-// Fonction pour retirer une option du menu déroulant après l'avoir sélectionnée comme tag
+// Function to remove an option from the dropdown after selecting it as a tag
 export function removeOptionFromDropdown(tagText, selector) {
-  const dropdownContainer = document.querySelector(selector); // Obtenir le conteneur du menu déroulant par le sélecteur
-  const options = Array.from(dropdownContainer.children); // Obtenir toutes les options du menu déroulant
+  const dropdownContainer = document.querySelector(selector); // Get dropdown container by selector
+  const options = Array.from(dropdownContainer.children); // Get all dropdown options
 
-  // Trouver l'option correspondant au texte du tag sélectionné
+  // Find the option matching the selected tag text
   const optionToRemove = options.find(
     (option) => option.textContent.trim() === tagText.trim()
   );
   if (optionToRemove) {
-    dropdownContainer.removeChild(optionToRemove); // Retirer l'option du menu déroulant
+    dropdownContainer.removeChild(optionToRemove); // Remove the option from the dropdown
   }
 }
 
-// Fonction pour ré-ajouter une option au menu déroulant après la suppression du tag
+// Function to re-add an option to the dropdown after removing the tag
 export function addOptionToDropdown(tagText, selector, addTagCallback) {
   const dropdownContainer = document.querySelector(selector);
   const option = document.createElement("li");
@@ -70,21 +70,4 @@ export function addOptionToDropdown(tagText, selector, addTagCallback) {
   option.addEventListener("click", () => addTagCallback(tagText, selector));
 
   dropdownContainer.appendChild(option);
-}
-
-//-------------------------------------------------------------------------------------------------
-
-// Fonction pour ajouter un tag sélectionné à selectedTags
-export function handleAddTag(tag, selector) {
-  // Si le tag n'est pas déjà sélectionné, l'ajouter à selectedTags
-  if (!selectedTags.includes(tag)) {
-    selectedTags.push(tag);
-  }
-
-  // Mettre à jour l'affichage des recettes filtrées
-  updateRecipesDisplay();
-
-  // Fermer le menu déroulant après la sélection (si nécessaire)
-  const dropdown = document.querySelector(selector);
-  dropdown.classList.remove("show");
 }

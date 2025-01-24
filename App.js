@@ -1,123 +1,169 @@
-import { filterAndMapRecipes } from "./filterAndMapRecipes.js";
-import recipes from "./data/recipes.js";
 import RecipeCardFactory from "./utils/RecipeCardFactory.js";
-import { updateRecipeCount } from "./utils/UIUtils.js";
-import { updateAdvancedFilters } from "./utils/FilterUtils.js";
-import { handleAddTag } from "./utils/TagUtils.js";
-import { handleDropdownOption } from "./utils/Dropdown.js";
-import { handleIngredientFilter } from "./utils/FilterUtils.js";
+import { searchRecipes } from "./utils/SearchBarUtils.js";
+import {
+  updateAdvancedFilters,
+  updateFilterOptions,
+  filterRecipesByTags,
+} from "./utils/FilterUtils.js";
+import {
+  addTag,
+  removeTag,
+  removeOptionFromDropdown,
+  addOptionToDropdown,
+} from "./utils/TagUtils.js";
+import { updateCards, updateRecipeCount } from "./utils/UIUtils.js";
+import { filterDropdownOptions } from "./utils/DropDownUtils.js";
+import recipes from "./data/recipes.js";
 
-// Variables globales pour stocker les filtres
-let inputValue = "";
-let selectedIngredient = "";
-let selectedAppliance = "";
-let selectedUstensils = "";
+//----------------------------
 
-// Initialiser selectedTags comme un tableau vide
+let currentInputValue = ""; // recherche actuelle
 let selectedTags = [];
 
-// Sélection des éléments du DOM
+//dataLoader
+let filteredRecipes = [...recipes]; // Par défaut, toutes les recettes sont affichées
+
+//QuerySelectors
+
+//header
 const searchBar = document.querySelector(".search-bar");
-const ingredientFilter = document.querySelector(".ingredient-search-input");
-const applianceFilter = document.querySelector(".appliance-search-input");
-const ustensilFilter = document.querySelector(".utensil-search-input");
-const recipesContainer = document.querySelector(".recipes-container");
+
+//DropdownFilter
+const ingredientSearchInput = document.querySelector(
+  ".ingredient-search-input"
+);
+const applianceSearchInput = document.querySelector(".appliance-search-input");
+const utensilSearchInput = document.querySelector(".utensil-search-input");
 const recipesCount = document.querySelector(".recipe-count-number");
 
-// Message d'erreur
+//Tag
+const tagContainerUnified = document.querySelector(".tag-container-unified");
+
+//Main
+const recipesContainer = document.querySelector(".recipes-container");
+
+//error
 const errorContainer = document.createElement("div");
 errorContainer.classList.add("no-results-message");
 recipesContainer.parentElement.appendChild(errorContainer);
 
-const filteredRecipes = filterAndMapRecipes(
-  recipes,
-  inputValue,
-  selectedIngredient,
-  selectedAppliance,
-  selectedUstensils
-);
+const recipeCardFactory = new RecipeCardFactory();
+updateRecipeCount(filteredRecipes.length, recipesCount);
 
-console.log("Voici les recettes filtrées", filteredRecipes);
-console.log("Voici les tags selectionnes", selectedTags);
-console.log("Voici l'ingrédient selectionne", selectedIngredient);
-console.log("Voici l'appareil selectionne", selectedAppliance);
-console.log("Voici les ustensiles selectionnes", selectedUstensils);
+//----------------------------
 
-// Fonction pour mettre à jour l'affichage des recettes
-const updateRecipesDisplay = () => {
-  const recipeCardFactory = new RecipeCardFactory(); // Instance de la factory
-  const filteredRecipes = filterAndMapRecipes(
-    recipes,
-    inputValue,
-    selectedIngredient,
-    selectedAppliance,
-    selectedUstensils
-  );
-  // Efface les recettes existantes
-  recipesContainer.innerHTML = "";
-  // Vérifie s'il y a des résultats
-  if (filteredRecipes.length === 0) {
-    recipesContainer.innerHTML = `<p class="no-results-message">Aucune recette ne correspond à votre recherche.</p>`;
-    return;
+// Fonction pour mettre à jour les filtres et rafraîchir les recettes affichées
+function updateFilters() {
+  // D'abord, filtrer les recettes par tags
+  let filteredByTags = filterRecipesByTags(recipes, selectedTags);
+
+  // Si la requête de recherche est vide, ne pas appliquer de filtrage de recherche, seulement un filtrage par tags
+  if (currentInputValue.length === 0) {
+    filteredRecipes = filteredByTags; // Afficher toutes les recettes filtrées par tags
+  } else {
+    // Appliquer la requête de recherche aux recettes filtrées par tags
+    filteredRecipes = searchRecipes(currentInputValue.trim(), filteredByTags);
   }
-  // Génère les cartes de recettes filtrées
-  //   filteredRecipes.forEach((recipe) => {
-  //     const recipeCard = recipeCardFactory.createRecipeCard(recipe); // Génère la carte avec la factory
-  //     recipesContainer.appendChild(recipeCard); // Ajoute la carte générée au conteneur
-  //   });
 
-  // Génère les cartes de recettes filtrées avec la factory et map
-  const recipeCards = filteredRecipes.map((recipe) => {
-    return recipeCardFactory.createRecipeCard(recipe); // Retourne un élément DOM
-  });
+  // Si aucune recette n'est trouvée, afficher un message d'erreur
+  if (filteredRecipes.length === 0) {
+    errorContainer.innerHTML = "Aucune recette ne correspond à la recherche";
+  } else {
+    errorContainer.innerHTML = "";
+  }
 
-  console.log("Voici les recettes filtéres dans App", filteredRecipes);
+  // Mettre à jour l'UI avec les recettes filtrées
+  updateCards(filteredRecipes, recipesContainer, recipeCardFactory);
 
-  // Une fois le tableau d'éléments généré, on les ajoute tous au conteneur
-  recipeCards.forEach((card) => recipesContainer.appendChild(card));
-
-  updateRecipeCount(filteredRecipes.length, recipesCount);
-  // Met à jour les filtres avancés
+  // Mettre à jour les options du menu déroulant avec les options disponibles basées sur les recettes filtrées
   updateAdvancedFilters(filteredRecipes, selectedTags, handleAddTag);
 
-  //   updateFilterOptions(selector, items, selectedTags, addTagCallback);
-  document
-    .querySelector(".ingredient-search-input")
-    .addEventListener("input", (event) => {
-      const value = event.target.value.toLowerCase();
-      console.log("Valeur entrée :", value);
-      handleIngredientFilter(value);
-    });
-};
-
-// Fonction pour mettre à jour les options de filtre dans le DOM
-function updateFilterOptions(selector, filteredOptions) {
-  const dropdownContainer = document.querySelector(selector);
-  dropdownContainer.innerHTML = ""; // Vider les options existantes
-
-  // Ajouter chaque option filtrée dans le dropdown
-  filteredOptions.forEach((option) => {
-    const optionElement = document.createElement("li");
-    optionElement.textContent = option;
-    optionElement.classList.add("dropdown-item");
-    dropdownContainer.appendChild(optionElement);
-  });
+  // Mettre à jour le nombre de recettes
+  updateRecipeCount(filteredRecipes.length, recipesCount);
 }
 
-// Écouteurs d'événements pour déclencher le filtrage
-searchBar.addEventListener("input", (e) => {
-  inputValue = e.target.value.trim().toLowerCase();
-  updateRecipesDisplay();
+// Ajouter un tag et mettre à jour les filtres lorsqu'un nouveau tag est sélectionné
+function handleAddTag(tagText, selector) {
+  if (
+    addTag(
+      tagText,
+      selector,
+      selectedTags,
+      tagContainerUnified,
+      handleRemoveTag,
+      updateFilters
+    )
+  ) {
+    updateAdvancedFilters(filteredRecipes, selectedTags, handleAddTag);
+  }
+}
+
+// Supprimer un tag et mettre à jour les filtres lorsqu'un tag est désélectionné
+function handleRemoveTag(tagText, tagElement, selector) {
+  selectedTags = removeTag(
+    tagText,
+    tagElement,
+    selector,
+    selectedTags,
+    tagContainerUnified,
+    (text, sel) => addOptionToDropdown(text, sel, handleAddTag),
+    updateFilters
+  );
+  updateAdvancedFilters(filteredRecipes, selectedTags, handleAddTag);
+  updateFilters();
+}
+
+// Écouteur d'événements pour la saisie dans la barre de recherche et filtrage des recettes en fonction de la requête de recherche
+searchBar.addEventListener("input", (event) => {
+  currentInputValue = event.target.value.trim(); // Supprimer les espaces superflus
+
+  // Mettre à jour les filtres uniquement si la requête n'est pas juste composée d'espaces ou vide
+  if (
+    currentInputValue.length === 0 ||
+    (event.inputType === "insertText" && event.data === " ")
+  ) {
+    updateFilters();
+    return; // Ne rien faire si la requête n'est composée que d'espaces
+  }
+
+  updateFilters(); // Réappliquer à la fois le filtrage par recherche et par tags
 });
 
-// ingredientFilter.addEventListener("input", (e) =>
-//   updateAdvancedFilters(e, "ingredient")
-// );
-applianceFilter.addEventListener("input", (e) => updateFilter(e, "appliance"));
-ustensilFilter.addEventListener("input", (e) => updateFilter(e, "ustensil"));
+// Écouteur d'événements pour la saisie dans le champ de recherche des ingrédients et filtrage des options du menu déroulant
+ingredientSearchInput.addEventListener("input", () => {
+  filterDropdownOptions(
+    ingredientSearchInput,
+    ".ingredient-options",
+    Array.from(
+      filteredRecipes.flatMap((r) => r.ingredients.map((ing) => ing.ingredient))
+    ),
+    (selector, items) =>
+      updateFilterOptions(selector, items, selectedTags, handleAddTag)
+  );
+});
 
-// Chargement initial des recettes
-updateRecipesDisplay();
+// Écouteur d'événements pour la saisie dans le champ de recherche des appareils et filtrage des options du menu déroulant
+applianceSearchInput.addEventListener("input", () => {
+  filterDropdownOptions(
+    applianceSearchInput,
+    ".appliance-options",
+    Array.from(filteredRecipes.map((r) => r.appliance)),
+    (selector, items) =>
+      updateFilterOptions(selector, items, selectedTags, handleAddTag)
+  );
+});
 
-//Chargement initial des filtres avancés
-updateAdvancedFilters(filteredRecipes, selectedTags, handleAddTag);
+// Écouteur d'événements pour la saisie dans le champ de recherche des ustensiles et filtrage des options du menu déroulant
+utensilSearchInput.addEventListener("input", () => {
+  filterDropdownOptions(
+    utensilSearchInput,
+    ".utensil-options",
+    Array.from(filteredRecipes.flatMap((r) => r.ustensils)),
+    (selector, items) =>
+      updateFilterOptions(selector, items, selectedTags, handleAddTag)
+  );
+});
+
+// Initialiser les cards avec toutes les recettes au chargement de la page
+updateCards(recipes, recipesContainer, recipeCardFactory);
+updateAdvancedFilters(recipes, selectedTags, handleAddTag);

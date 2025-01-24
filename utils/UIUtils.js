@@ -1,4 +1,4 @@
-// Fonction pour mettre à jour l'interface utilisateur avec les recettes filtrées
+// Function to update the UI with the filtered recipes
 export function updateCards(
   recipesToShow,
   recipesContainer,
@@ -6,15 +6,23 @@ export function updateCards(
 ) {
   recipesContainer.innerHTML = "";
 
-  // Parcourir chaque recette et créer une carte en utilisant la RecipeCardFactory
+  // Loop through each recipe and create a card using the RecipeCardFactory
   recipesToShow.forEach((recipe) => {
-    const recipeCard = recipeCardFactory.createRecipeCard(recipe); // Créer une nouvelle carte de recette
-    recipesContainer.appendChild(recipeCard); // Ajouter la carte de recette au conteneur
+    const recipeCard = recipeCardFactory.createRecipeCard(recipe); // Create a new recipe card
+    recipesContainer.appendChild(recipeCard); // Append the recipe card to the container
   });
 }
 
-// Fonction pour mettre à jour le nombre de recettes affichées
+// Function to display a message when no results are found for a query
+export function displayNoResultsMessage(query, errorContainer) {
+  // Display a custom error message with the user's query
+  errorContainer.innerHTML = `
+      <p>Aucune recette ne contient '${query}'. Vous pouvez chercher des termes comme « tarte aux pommes », « poisson », etc.</p>
+  `;
+}
+
+// Function to update the displayed count of recipes
 export function updateRecipeCount(count, recipesCountElement) {
-  // Mettre à jour le contenu textuel pour afficher le nombre de recettes trouvées
+  // Update the text content to show the number of recipes found
   recipesCountElement.textContent = `${count} recettes`;
 }

@@ -1,20 +1,3 @@
-import recipes from "../data/recipes.js";
-export function handleDropdownOption(event, option) {
-  //Recuperer la valeur de l'input
-  const inputValue = event.target.value.toLowerCase();
-
-  console.log("Voici la valeur de l'input", inputValue);
-
-  //Filtrer les options du dropdown
-  const filteredOptions = option.filter((option) =>
-    option.toLowerCase().includes(inputValue)
-  );
-
-  // Mettre à jour le dropdown avec les options filtrées
-  updateFilterOptions(".ingredient-options", filteredOptions);
-}
-
-// Fonction pour mettre à jour les filtres avancés
 export function updateAdvancedFilters(
   filteredRecipes,
   selectedTags,
@@ -31,110 +14,64 @@ export function updateAdvancedFilters(
     recipe.ustensils.forEach((ust) => utensils.add(ust));
   });
 
-  console.log("Ingredients dans FilterUtils:", ingredients);
-  console.log("Appliances dans FilterUtils:", appliances);
-  console.log("Ustensils dans FilterUtils:", utensils);
-
   // Mettre à jour les options du menu déroulant avec les éléments de filtre disponibles et non sélectionnés
   updateFilterOptions(
     ".ingredient-options",
-    Array.from(ingredients).sort(), // Tri des ingrédients pour un affichage ordonné
+    Array.from(ingredients),
     selectedTags,
     addTagCallback
   );
   updateFilterOptions(
     ".appliance-options",
-    Array.from(appliances).sort(), // Tri des appareils pour un affichage ordonné
+    Array.from(appliances),
     selectedTags,
     addTagCallback
   );
   updateFilterOptions(
     ".utensil-options",
-    Array.from(utensils).sort(), // Tri des ustensiles pour un affichage ordonné
+    Array.from(utensils),
     selectedTags,
     addTagCallback
   );
 }
 
 // Fonction pour remplir les menus déroulants avec les options de filtre disponibles
-function updateFilterOptions(selector, filteredOptions, selectedTags) {
+export function updateFilterOptions(
+  selector,
+  items,
+  selectedTags,
+  addTagCallback
+) {
   const dropdownContainer = document.querySelector(selector);
-  dropdownContainer.innerHTML = ""; // Vider les options existantes
+  dropdownContainer.innerHTML = ""; // Effacer les éléments existants du menu déroulant
 
-  // Ajouter chaque option filtrée dans le dropdown
-  filteredOptions.forEach((option) => {
-    // Ne pas afficher les options déjà sélectionnées
-    if (!selectedTags.includes(option)) {
-      const optionElement = document.createElement("li");
-      optionElement.textContent = option;
-      optionElement.classList.add("dropdown-item");
-      dropdownContainer.appendChild(optionElement);
-    }
+  // Filtrer les éléments sélectionnés des options du menu déroulant
+  const unselectedItems = items.filter((item) => !selectedTags.includes(item));
+
+  // Créer et ajouter des options de menu déroulant pour les éléments non sélectionnés
+  unselectedItems.forEach((item) => {
+    const option = document.createElement("li");
+    option.textContent = item;
+    option.classList.add("dropdown-item");
+    option.addEventListener("click", () => addTagCallback(item, selector));
+    dropdownContainer.appendChild(option);
   });
 }
 
-//-------------------------
-
-// Fonction pour gérer le filtrage des ingrédients
-export function handleIngredientFilter(inputElement) {
-  const ingredientsList = recipes.flatMap(
-    (recipe) => recipe.ingredients.map((item) => item.ingredient.toLowerCase()) // Liste des ingrédients en minuscule
-  );
-
-  // Appeler la fonction de filtrage et mettre à jour le dropdown
-  filterDropdownOptions(
-    inputElement,
-    ".ingredient-options", // Sélecteur du dropdown à mettre à jour
-    ingredientsList, // Liste des ingrédients à filtrer
-    selectedTags, // Tags sélectionnés (si nécessaire pour l'exclusion)
-    updateFilterOptions // Fonction pour mettre à jour les options du dropdown
-  );
-}
-
-// Fonction pour gérer le filtrage des appareils
-export function handleApplianceFilter(inputElement) {
-  const appliancesList = recipes.map((recipe) =>
-    recipe.appliance.toLowerCase()
-  );
-  filterDropdownOptions(
-    inputElement,
-    ".appliance-options",
-    appliancesList,
-    selectedTags,
-    updateFilterOptions
-  );
-}
-
-// Fonction pour gérer le filtrage des ustensiles
-export function handleUstensilFilter(inputElement) {
-  const ustensilsList = recipes.flatMap((recipe) =>
-    recipe.ustensils.map((ustensil) => ustensil.toLowerCase())
-  );
-  filterDropdownOptions(
-    inputElement,
-    ".ustensil-options",
-    ustensilsList,
-    selectedTags,
-    updateFilterOptions
-  );
-}
-
-//------------------------------------------
-
-function filterDropdownOptions(
-  inputElement,
-  selector,
-  list,
-  selectedTags,
-  updateFilterOptions
-) {
-  const searchTerm = inputElement.value.toLowerCase();
-
-  // Filtrer les éléments de la liste en fonction de ce que l'utilisateur tape
-  const filteredList = list.filter((item) =>
-    item.toLowerCase().includes(searchTerm)
-  );
-
-  // Mettre à jour le dropdown avec les éléments filtrés
-  updateFilterOptions(selector, filteredList, selectedTags);
+// Fonction pour filtrer les recettes en fonction des tags sélectionnés
+export function filterRecipesByTags(recipes, selectedTags) {
+  return recipes.filter((recipe) => {
+    return selectedTags.every((tag) => {
+      const matchIngredient = recipe.ingredients.some((ingredient) =>
+        ingredient.ingredient.toLowerCase().includes(tag.toLowerCase())
+      );
+      const matchAppliance = recipe.appliance
+        .toLowerCase()
+        .includes(tag.toLowerCase());
+      const matchUtensil = recipe.ustensils.some((utensil) =>
+        utensil.toLowerCase().includes(tag.toLowerCase())
+      );
+      return matchIngredient || matchAppliance || matchUtensil; // Retourner true si un tag correspond
+    });
+  });
 }
