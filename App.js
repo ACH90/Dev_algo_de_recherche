@@ -1,5 +1,5 @@
 import { filterAndMapRecipes } from "./filterAndMapRecipes.js";
-import recipes from "/data/recipes.js";
+import recipes from "./data/recipes.js";
 import RecipeCardFactory from "./utils/RecipeCardFactory.js";
 import { updateRecipeCount } from "./utils/UIUtils.js";
 import { updateAdvancedFilters } from "./utils/FilterUtils.js";
