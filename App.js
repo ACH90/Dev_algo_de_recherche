@@ -33,7 +33,7 @@ const ingredientSearchInput = document.querySelector(
   ".ingredient-search-input"
 );
 const applianceSearchInput = document.querySelector(".appliance-search-input");
-const utensilSearchInput = document.querySelector(".utensil-search-input");
+const ustensilSearchInput = document.querySelector(".ustensil-search-input");
 const recipesCount = document.querySelector(".recipe-count-number");
 
 //Tag
@@ -130,39 +130,120 @@ searchBar.addEventListener("input", (event) => {
   updateFilters(); // Réappliquer à la fois le filtrage par recherche et par tags
 });
 
-// Écouteur d'événements pour la saisie dans le champ de recherche des ingrédients et filtrage des options du menu déroulant
 ingredientSearchInput.addEventListener("input", () => {
-  filterDropdownOptions(
-    ingredientSearchInput,
+  const query = ingredientSearchInput.value.trim().toLowerCase(); // Valeur de recherche en minuscule
+  console.log("Query :", query);
+
+  // Filtrer les recettes contenant le query
+  const updatedRecipes = filteredRecipes.filter((recipe) =>
+    recipe.ingredients.some((ing) =>
+      ing.ingredient.toLowerCase().includes(query)
+    )
+  );
+
+  // Extraire les ingrédients uniques (normalisés pour comparaison)
+  const filteredIngredients = Array.from(
+    updatedRecipes
+      .flatMap(
+        (recipe) =>
+          recipe.ingredients
+            .map((ing) => ing.ingredient) // Obtenir les noms originaux
+            .filter((ingredient) => ingredient.toLowerCase().includes(query)) // Filtrer par le query
+      )
+      .reduce((uniqueMap, ingredient) => {
+        const normalizedIngredient = ingredient.toLowerCase(); // Normaliser pour comparaison
+        if (!uniqueMap.has(normalizedIngredient)) {
+          uniqueMap.set(normalizedIngredient, ingredient); // Conserver l'original
+        }
+        return uniqueMap;
+      }, new Map()) // Utiliser une Map pour préserver l'ordre
+      .values()
+  );
+
+  // Affichage des résultats uniques
+  console.log("Ingrédients filtrés :", filteredIngredients);
+
+  // Mettre à jour les options du menu déroulant
+  updateFilterOptions(
     ".ingredient-options",
-    Array.from(
-      //Transformer et tableau les resultats suivants
-      filteredRecipes.flatMap((r) => r.ingredients.map((ing) => ing.ingredient))
-    ),
-    (selector, items) =>
-      updateFilterOptions(selector, items, selectedTags, handleAddTag)
+    filteredIngredients,
+    selectedTags,
+    handleAddTag
   );
 });
 
 // Écouteur d'événements pour la saisie dans le champ de recherche des appareils et filtrage des options du menu déroulant
+// Filtrage pour les appareils
 applianceSearchInput.addEventListener("input", () => {
-  filterDropdownOptions(
-    applianceSearchInput,
+  const query = applianceSearchInput.value.trim().toLowerCase(); // Valeur de recherche en minuscule
+  console.log("Query appareils :", query);
+
+  // Filtrer les recettes contenant le query pour les appareils
+  const updatedRecipes = filteredRecipes.filter(
+    (recipe) => recipe.appliance.toLowerCase().includes(query) // Vérification si la chaîne contient le query
+  );
+
+  // Extraire les appareils uniques (normalisés pour comparaison)
+  const filteredAppliances = Array.from(
+    updatedRecipes
+      .flatMap((recipe) => recipe.appliance) // Obtenir les appareils
+      .filter((appliance) => appliance.toLowerCase().includes(query)) // Filtrer par le query
+      .reduce((uniqueMap, appliance) => {
+        const normalizedAppliance = appliance.toLowerCase(); // Normaliser pour comparaison
+        if (!uniqueMap.has(normalizedAppliance)) {
+          uniqueMap.set(normalizedAppliance, appliance); // Conserver l'original
+        }
+        return uniqueMap;
+      }, new Map()) // Utiliser une Map pour préserver l'ordre
+      .values()
+  );
+
+  // Affichage des résultats uniques
+  console.log("Appareils filtrés :", filteredAppliances);
+
+  // Mettre à jour les options du menu déroulant pour les appareils
+  updateFilterOptions(
     ".appliance-options",
-    Array.from(filteredRecipes.map((r) => r.appliance)),
-    (selector, items) =>
-      updateFilterOptions(selector, items, selectedTags, handleAddTag)
+    filteredAppliances,
+    selectedTags,
+    handleAddTag
   );
 });
 
-// Écouteur d'événements pour la saisie dans le champ de recherche des ustensiles et filtrage des options du menu déroulant
-utensilSearchInput.addEventListener("input", () => {
-  filterDropdownOptions(
-    utensilSearchInput,
-    ".utensil-options",
-    Array.from(filteredRecipes.flatMap((r) => r.ustensils)),
-    (selector, items) =>
-      updateFilterOptions(selector, items, selectedTags, handleAddTag)
+// Filtrage pour les ustensiles
+ustensilSearchInput.addEventListener("input", () => {
+  const query = ustensilSearchInput.value.trim().toLowerCase(); // Valeur de recherche en minuscule
+  console.log("Query ustensiles :", query);
+
+  // Filtrer les recettes contenant le query pour les ustensiles
+  const updatedRecipes = filteredRecipes.filter((recipe) =>
+    recipe.ustensils.some((ustensil) => ustensil.toLowerCase().includes(query))
+  );
+
+  // Extraire les ustensiles uniques (normalisés pour comparaison)
+  const filteredUstensils = Array.from(
+    updatedRecipes
+      .flatMap((recipe) => recipe.ustensils) // Obtenir les ustensiles
+      .filter((ustensil) => ustensil.toLowerCase().includes(query)) // Filtrer par le query
+      .reduce((uniqueMap, ustensil) => {
+        const normalizedUstensil = ustensil.toLowerCase(); // Normaliser pour comparaison
+        if (!uniqueMap.has(normalizedUstensil)) {
+          uniqueMap.set(normalizedUstensil, ustensil); // Conserver l'original
+        }
+        return uniqueMap;
+      }, new Map()) // Utiliser une Map pour préserver l'ordre
+      .values()
+  );
+
+  // Affichage des résultats uniques
+  console.log("Ustensiles filtrés :", filteredUstensils);
+
+  // Mettre à jour les options du menu déroulant pour les ustensiles
+  updateFilterOptions(
+    ".ustensil-options",
+    filteredUstensils,
+    selectedTags,
+    handleAddTag
   );
 });
 

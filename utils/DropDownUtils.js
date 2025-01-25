@@ -1,12 +1,7 @@
 //fonction pour mettre en minuscule, supprimer les doublons et mettre la premiere lettre en majuscule pour
 // chaque options
 
-export function filterDropdownOptions(
-  inputElement,
-  selector,
-  items,
-  updateFilterOptions
-) {
+export function filterDropdownOptions(inputElement, selector, items) {
   const searchValue = inputElement.value.toLowerCase();
   const uniqueItems = new Set();
 
@@ -24,6 +19,4 @@ export function filterDropdownOptions(
   const capitalizedItems = filteredItems.map(
     (item) => item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
   );
-
-  updateFilterOptions(selector, capitalizedItems);
 }
