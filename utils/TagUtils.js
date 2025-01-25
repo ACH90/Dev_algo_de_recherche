@@ -9,6 +9,7 @@ export function addTag(
 ) {
   if (!selectedTags.includes(tagText)) {
     selectedTags.push(tagText); // Add tag to the selected tags array
+    console.log("selectedTags", selectedTags);
 
     const tagElement = document.createElement("div");
     tagElement.classList.add("tag");

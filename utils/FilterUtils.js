@@ -62,16 +62,25 @@ export function updateFilterOptions(
 export function filterRecipesByTags(recipes, selectedTags) {
   return recipes.filter((recipe) => {
     return selectedTags.every((tag) => {
-      const matchIngredient = recipe.ingredients.some((ingredient) =>
-        ingredient.ingredient.toLowerCase().includes(tag.toLowerCase())
-      );
-      const matchAppliance = recipe.appliance
-        .toLowerCase()
-        .includes(tag.toLowerCase());
-      const matchUtensil = recipe.ustensils.some((utensil) =>
-        utensil.toLowerCase().includes(tag.toLowerCase())
-      );
-      return matchIngredient || matchAppliance || matchUtensil; // Retourner true si un tag correspond
+      let match = false;
+
+      if (
+        recipe.ingredients.some((ingredient) =>
+          ingredient.ingredient.includes(tag)
+        )
+      ) {
+        match = true;
+      }
+
+      if (recipe.appliance.includes(tag)) {
+        match = true;
+      }
+
+      if (recipe.ustensils.some((utensil) => utensil.includes(tag))) {
+        match = true;
+      }
+
+      return match;
     });
   });
 }

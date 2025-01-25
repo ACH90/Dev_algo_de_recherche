@@ -72,7 +72,7 @@ function updateFilters() {
     errorContainer.innerHTML = "";
   }
 
-  // Mettre à jour l'UI avec les recettes filtrées
+  // Mettre à jour les cards avec les recettes filtrées
   updateCards(filteredRecipes, recipesContainer, recipeCardFactory);
 
   // Mettre à jour les options du menu déroulant avec les options disponibles basées sur les recettes filtrées
@@ -113,6 +113,8 @@ function handleRemoveTag(tagText, tagElement, selector) {
   updateFilters();
 }
 
+//----------------------- ECOUTEURS D'EVENEMENTS -----------------------------------
+
 // Écouteur d'événements pour la saisie dans la barre de recherche et filtrage des recettes en fonction de la requête de recherche
 searchBar.addEventListener("input", (event) => {
   currentInputValue = event.target.value.trim(); // Supprimer les espaces superflus
@@ -122,7 +124,6 @@ searchBar.addEventListener("input", (event) => {
     currentInputValue.length === 0 ||
     (event.inputType === "insertText" && event.data === " ")
   ) {
-    updateFilters();
     return; // Ne rien faire si la requête n'est composée que d'espaces
   }
 
@@ -135,6 +136,7 @@ ingredientSearchInput.addEventListener("input", () => {
     ingredientSearchInput,
     ".ingredient-options",
     Array.from(
+      //Transformer et tableau les resultats suivants
       filteredRecipes.flatMap((r) => r.ingredients.map((ing) => ing.ingredient))
     ),
     (selector, items) =>
@@ -164,6 +166,9 @@ utensilSearchInput.addEventListener("input", () => {
   );
 });
 
+//--------------------------------INITIALISATION---------------------------------------------
+
 // Initialiser les cards avec toutes les recettes au chargement de la page
-updateCards(recipes, recipesContainer, recipeCardFactory);
-updateAdvancedFilters(recipes, selectedTags, handleAddTag);
+// updateCards(recipes, recipesContainer, recipeCardFactory);
+// updateAdvancedFilters(recipes, selectedTags, handleAddTag);
+updateFilters();

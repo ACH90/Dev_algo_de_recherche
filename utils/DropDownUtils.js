@@ -1,3 +1,6 @@
+//fonction pour mettre en minuscule, supprimer les doublons et mettre la premiere lettre en majuscule pour
+// chaque options
+
 export function filterDropdownOptions(
   inputElement,
   selector,
